@@ -8,6 +8,8 @@ import com.silvesterhasani.lufthansatestbackend.repository.ApplicationRepository
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
 import com.silvesterhasani.lufthansatestbackend.repository.UserVacationDataRepository;
 import com.silvesterhasani.lufthansatestbackend.services.WorkDaysFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,7 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/")
 public class SupervisorController {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SupervisorController.class);
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
@@ -82,6 +84,7 @@ public class SupervisorController {
                 javaMailSender.send(msg);
             }
             Applications updatedApplication = applicationRepository.save(application);
+            LOGGER.info("Updated a new Application for user " + application.getUsername());
             return ResponseEntity.ok(updatedApplication);
 
 

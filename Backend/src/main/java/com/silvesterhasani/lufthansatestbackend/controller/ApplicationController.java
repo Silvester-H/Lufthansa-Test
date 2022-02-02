@@ -6,7 +6,9 @@ import com.silvesterhasani.lufthansatestbackend.repository.ApplicationRepository
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
 import com.silvesterhasani.lufthansatestbackend.repository.UserVacationDataRepository;
 import com.silvesterhasani.lufthansatestbackend.services.WorkDaysFinder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/v1/")
 public class ApplicationController {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationController.class);
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
@@ -69,9 +71,11 @@ public class ApplicationController {
             long daysBetween = startDateUser.getTime() - now.getTime();
             if (TimeUnit.DAYS.convert(daysBetween, TimeUnit.MILLISECONDS)>90) {
                applicationRepository.save(application);
+               LOGGER.info("Added a new Application for user " + username);
                return "Application Saved";
             } else {
                 return  "Probation period hasn't finished";
+
             }
         } else {
             return  "Not enough Vacation days remaining";
@@ -98,6 +102,7 @@ public class ApplicationController {
         application.setReason(applicationData.getReason());
         application.setStatus(applicationData.getStatus());
         Applications updatedApplication = applicationRepository.save(application);
+        LOGGER.info("Updated a new Application for user " + applicationData.getUsername());
         return ResponseEntity.ok(updatedApplication);
     }
 
@@ -106,6 +111,7 @@ public class ApplicationController {
     public ResponseEntity<Map<String, Boolean>> deleteApplication(@PathVariable Long id, @PathVariable String token){
         Applications application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application with id " +id + " does not exist."));
+        LOGGER.info("Deleted an Application for user " +  application.getUsername());
         applicationRepository.delete(application);
         Map<String,Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

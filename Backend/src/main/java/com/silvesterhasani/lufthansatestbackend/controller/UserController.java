@@ -7,6 +7,8 @@ import com.silvesterhasani.lufthansatestbackend.model.UserVacationData;
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
 import com.silvesterhasani.lufthansatestbackend.repository.UserVacationDataRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/")
 public class UserController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserRepository userRepository;
     private final UserVacationDataRepository userVacationDataRepository;
     private final PasswordEncoder passwordEncoder;
@@ -44,7 +47,7 @@ public class UserController {
         UserVacationData NewVacation = new UserVacationData();
         NewVacation.setDays(40);
         userVacationDataRepository.save(NewVacation);
-//            ADD LOG TO FILE
+        LOGGER.info("Created a new user " + user.getUsername());
         return userRepository.save(user);
     }
 
@@ -68,7 +71,7 @@ public class UserController {
         user.setModified_at(userData.getModified_at());
         user.setModified_by(userData.getModified_by());
         user.setUser_type(userData.getUser_type());
-
+        LOGGER.info("Updated user: " + user.getUsername());
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);
     }
@@ -85,7 +88,7 @@ public class UserController {
         user.setStartDate(userData.getStartDate());
         user.setPassword(passwordEncoder.encode(userData.getPassword()));
         User updatedUser = userRepository.save(user);
-
+        LOGGER.info("Updated user: " + user.getUsername());
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -100,7 +103,7 @@ public class UserController {
         user.setModified_by(userData.getModified_by());
         user.setStartDate(userData.getStartDate());
         User updatedUser = userRepository.save(user);
-
+        LOGGER.info("User updated own password: " + user.getUsername());
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -112,6 +115,7 @@ public class UserController {
 
         UserVacationData userVac = userVacationDataRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " +id + " does not exist."));
+        LOGGER.info("Deleted a user " +  user.getUsername());
         userRepository.delete(user);
         userVacationDataRepository.delete(userVac);
         Map<String,Boolean> response = new HashMap<>();

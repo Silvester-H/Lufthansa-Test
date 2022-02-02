@@ -6,7 +6,8 @@ import com.silvesterhasani.lufthansatestbackend.model.AuthenticationResponse;
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
 import com.silvesterhasani.lufthansatestbackend.services.JwtUtil;
 import com.silvesterhasani.lufthansatestbackend.services.MyUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,15 +15,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/")
 public class LoginController {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
     private final AuthenticationProvider authenticationProvider;
     private final MyUserDetailsService userDetailsService;
     private final UserRepository userRepository;
@@ -54,12 +54,13 @@ public class LoginController {
         final String user_type = userRepository
                 .findByUsername(authenticationRequest.getUsername()).getUser_type();
 
+        LOGGER.info("User logged in: " + userDetails.getUsername() );
         return ResponseEntity.ok(new AuthenticationResponse(jwt,user_type));
 
     }
     @CrossOrigin
     @GetMapping ("/logout{username}{token}")
     public void logout(@PathVariable String username,@PathVariable String token) {
-       // LOG that someone logs out
+        LOGGER.info("User logged out: " +username );
     }
 }
