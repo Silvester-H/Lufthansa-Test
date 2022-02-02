@@ -3,6 +3,7 @@ package com.silvesterhasani.lufthansatestbackend.controller;
 
 import com.silvesterhasani.lufthansatestbackend.exception.ResourceNotFoundException;
 import com.silvesterhasani.lufthansatestbackend.model.User;
+import com.silvesterhasani.lufthansatestbackend.model.UserVacationData;
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
 import com.silvesterhasani.lufthansatestbackend.repository.UserVacationDataRepository;
 
@@ -40,7 +41,9 @@ public class UserController {
     // create users rest api
     @PostMapping("/users{token}")
     public User createUser(@RequestBody User user,@PathVariable String token) {
-
+        UserVacationData NewVacation = new UserVacationData();
+        NewVacation.setDays(40);
+        userVacationDataRepository.save(NewVacation);
 //            ADD LOG TO FILE
         return userRepository.save(user);
     }
@@ -61,7 +64,7 @@ public class UserController {
         user.setUsername(userData.getUsername());
 //      user.setPassword(passwordEncoder.encode(userData.getPassword()));
         user.setPassword(userData.getPassword());
-
+        user.setStartDate(userData.getStartDate());
         user.setModified_at(userData.getModified_at());
         user.setModified_by(userData.getModified_by());
         user.setUser_type(userData.getUser_type());
@@ -79,6 +82,7 @@ public class UserController {
         user.setModified_at(userData.getModified_at());
         user.setModified_by(userData.getModified_by());
         user.setUser_type(userData.getUser_type());
+        user.setStartDate(userData.getStartDate());
         user.setPassword(passwordEncoder.encode(userData.getPassword()));
         User updatedUser = userRepository.save(user);
 
@@ -94,7 +98,7 @@ public class UserController {
 //      user.setPassword(userData.getPassword());
         user.setModified_at(userData.getModified_at());
         user.setModified_by(userData.getModified_by());
-
+        user.setStartDate(userData.getStartDate());
         User updatedUser = userRepository.save(user);
 
         return ResponseEntity.ok(updatedUser);
@@ -105,10 +109,11 @@ public class UserController {
     public ResponseEntity<Map<String, Boolean>> deleteUser(@PathVariable Long id, @PathVariable String token){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " +id + " does not exist."));
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
-
+        UserVacationData userVac = userVacationDataRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " +id + " does not exist."));
         userRepository.delete(user);
+        userVacationDataRepository.delete(userVac);
         Map<String,Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(response);

@@ -3,8 +3,10 @@ import UserServices from '../services/UserServices';
 import LoginService from '../services/LoginService';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
+import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
 let user_name = localStorage.getItem('username');
+
 class updateUserPasswordComponent extends Component {
     constructor(props){
         super(props)
@@ -126,35 +128,6 @@ class updateUserPasswordComponent extends Component {
                                                 <label>New Password</label>
                                                 <input type="password" placeholder="Password" name="password" className="form-control" value={this.state.password} onChange={this.changePasswordHandler}/>
                                             </div>
-                                            {/* <div className="form-group">
-                                                <label>User Type</label>
-                                                <select className="form-control" name="user_type" value={this.state.user_type} onChange={this.changeUserTypeHandler}>
-                                                <option value="Admin" selected>Admin</option>
-                                                <option value="User">User</option>
-                                                </select>
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Status</label>
-                                                <select className="form-control" name="status" value={this.state.status} onChange={this.changeStatusHandler}>
-                                                <option value selected="Active">Active</option>
-                                                <option value="Not Active">Not Active</option>
-                                                </select>
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Institution</label>
-                                                <select className="form-control" name="institution" value={this.state.institution} onChange={this.changeInstitutionHandler}>
-                                                <option value selected="Ministria">Ministria</option>
-                                                <option value="AZHBR">AZHBR</option>
-                                                </select>
-                                                </div> */}
-                                            {/* <div className="form-group">
-                                                <label>Modified By</label>
-                                                <input placeholder="Modified By" name="modified_by" className="form-control" value={this.state.modified_by} readOnly/>
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Modified At</label>
-                                                <input placeholder="Modified Ay" name="modified_at" className="form-control" value={this.state.modified_at} readOnly/>
-                                            </div> */}
                                             <br>
                                             </br>
                                            

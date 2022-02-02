@@ -31,6 +31,9 @@ class UserService {
     updateOwnPassword(user,username) {
         return axios.put(USER_API_BASE_URL + '/password/' + username, user,config);
     }
+    updateSupervisorPassword(user,username) {
+        return axios.put(USER_API_BASE_URL + '/password/' + username, user,config);
+    }
     deleteUser(userID){
         return axios.delete(USER_API_BASE_URL + '/' + userID,config);
     }

@@ -9,6 +9,7 @@ import 'jquery/dist/jquery.min.js';
 import "datatables.net-dt/js/dataTables.dataTables"
 import "datatables.net-dt/css/jquery.dataTables.min.css"
 import 'datatables.net-responsive'
+import dateFormat from 'dateformat';
 const $ = require("jquery");
 $.Datatable = require("datatables.net-responsive");
 let user_logged= localStorage.getItem('user_type');

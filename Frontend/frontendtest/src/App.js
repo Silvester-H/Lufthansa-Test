@@ -11,10 +11,13 @@ import ListUserComponent from './components/ListUserComponent';
 import CreateUserComponent from './components/CreateUserComponent';
 import UpdateUserComponent from './components/UpdateUserComponent';
 import ViewUserComponent from './components/ViewUserComponent';
+import ViewSupervisorComponent from './components/ViewSupervisorComponent';
 import LoginComponent from './components/LoginComponent';
 import UpdateUserPasswordComponent from './components/UpdateUserPasswordComponent';
 import updateOwnPasswordComponent from './components/UpdateOwnPasswordComponent';
-import ListAdmissionsComponent from './components/ListAdmissionsComponent';
+import UpdateSupervisorPasswordComponent from './components/UpdateSupervisorPasswordComponent';
+import ListSupervisorComponent from './components/ListSupervisorComponent';
+import UpdateSupervisorComponent from './components/UpdateSupervisorComponent';
 function App() {
   return (
     <div>
@@ -36,7 +39,10 @@ function App() {
             <Route path= "/update_user_password/:id" component = {UpdateUserPasswordComponent}></Route>
             <Route path= "/view_user/:id" component = {ViewUserComponent}></Route>
             <Route path= "/update_password/" component = {updateOwnPasswordComponent}></Route>
-            <Route path= "/admissions" component = {ListAdmissionsComponent}></Route>
+            <Route path= "/supervisors" component = {ListSupervisorComponent}></Route>
+            <Route path= "/view_supervisors/:id" component = {ViewSupervisorComponent}></Route>
+            <Route path= "/update_supervisor_password/" component = {UpdateSupervisorPasswordComponent}></Route>
+            <Route path= "/update_supervisors/:id" component = {UpdateSupervisorComponent}></Route>
           </Switch>
         </div>
       

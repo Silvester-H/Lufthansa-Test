@@ -1,92 +1,114 @@
 package com.silvesterhasani.lufthansatestbackend.controller;
 
+import com.silvesterhasani.lufthansatestbackend.exception.ResourceNotFoundException;
 import com.silvesterhasani.lufthansatestbackend.model.Applications;
 import com.silvesterhasani.lufthansatestbackend.repository.ApplicationRepository;
 import com.silvesterhasani.lufthansatestbackend.repository.UserRepository;
+import com.silvesterhasani.lufthansatestbackend.repository.UserVacationDataRepository;
+import com.silvesterhasani.lufthansatestbackend.services.WorkDaysFinder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 @RequestMapping("/api/v1/")
 public class ApplicationController {
 
+
+    private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final UserVacationDataRepository userVacationDataRepository;
 
-    public ApplicationController(UserRepository userRepository, ApplicationRepository applicationRepository) {
+    public ApplicationController(UserRepository userRepository, ApplicationRepository applicationRepository, UserVacationDataRepository userVacationDataRepository, JavaMailSender javaMailSender) {
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
-
+        this.userVacationDataRepository = userVacationDataRepository;
+        this.javaMailSender = javaMailSender;
     }
 
     //get all applications for User
     @GetMapping("/application{token}")
-    public Applications getAllApplications(@PathVariable String token) {
+    public List<Applications> getAllApplications(@PathVariable String token){
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         String username = userDetails.getUsername();
-        return  applicationRepository.findByUsername(username);
+         return applicationRepository.findByUsername(username);
+    }
+    @GetMapping("/applicationVacations{token}")
+    public Long getVacationData(@PathVariable String token){
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        String username = userDetails.getUsername();
+        long id =  userRepository.findByUsername(username).getId();
+        long VacationData = userVacationDataRepository.findById(id).get().getDays();
+        return VacationData;
     }
 
     // create application rest api
     @PostMapping("/application{token}")
-    public Applications createApplication(@RequestBody Applications application,@PathVariable String token) {
+    public String createApplication(@RequestBody Applications application,@PathVariable String token) {
+        String username = application.getUsername();
 
-        return applicationRepository.save(application);
+        Long idUser = userRepository.findByUsername(username).getId();
+        Long noDays = userVacationDataRepository.findById(idUser).get().getDays();
+        Date startDateUser =  userRepository.findByUsername(username).getStartDate();
+        int Workdays = WorkDaysFinder.getWorkingDaysBetweenTwoDates(application.getStartDate(), application.getEndDate());
+        if ((noDays - Workdays) > 0) {
+            Date now = new Date();
+            long daysBetween = startDateUser.getTime() - now.getTime();
+            if (TimeUnit.DAYS.convert(daysBetween, TimeUnit.MILLISECONDS)>90) {
+               applicationRepository.save(application);
+               return "Application Saved";
+            } else {
+                return  "Probation period hasn't finished";
+            }
+        } else {
+            return  "Not enough Vacation days remaining";
+        }
     }
-//
-//    //get application by id rest api
-//    @GetMapping("/applications/{id}{token}")
-//    public ResponseEntity<Application> getApplicationById(@PathVariable Long id,@PathVariable String token) {
-//        Application application = applicationRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("Application with id " +id + " does not exist."));
-//        return ResponseEntity.ok(application);
-//    }
-//
-//    // update application by id rest api
-//    @PutMapping("applications/{id}{token}")
-//    public ResponseEntity<Application> updateApplication(@PathVariable Long id, @RequestBody ApplicationData,@PathVariable String token) {
-//       Application application = applicationRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("application with id " +id + " does not exist."));
-//        application.setName(applicationData.getName());
-//        application.setSurname(applicationData.getSurname());
-//        application.setEmail(applicationData.getEmail());
-//        application.setId_card(applicationData.getId_card());
-//        application.setLand_area(applicationData.getLand_area());
-//        application.setModified_at(applicationData.getModified_at());
-//        application.setModified_by(applicationData.getModified_by());
-//        application.setStatus(applicationData.getStatus());
-//        Application updatedApplication = applicationRepository.save(application);
-//
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-//        LocalDateTime now = LocalDateTime.now();
-//        Report report = new Report();
-//        report.setUser(application.getModified_by());
-//        report.setAction("Updated application with id: " + id);
-//        report.setTime(dtf.format(now));
-//        reportRepository.save(report);
-//        return ResponseEntity.ok(updatedApplication);
-//    }
-//
-//    //delete application by id rest api
-//    @DeleteMapping("/applications/{id}{token}")
-//    public ResponseEntity<Map<String, Boolean>> deleteApplication(@PathVariable Long id,@PathVariable String token){
-//        Application application = applicationRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("Application with id " +id + " does not exist."));
-//        applicationRepository.delete(application);
-//
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-//        LocalDateTime now = LocalDateTime.now();
-//        Report report = new Report();
-//        report.setUser(application.getModified_by());
-//        report.setAction("Deleted Application with id: " + id);
-//        report.setTime(dtf.format(now));
-//        reportRepository.save(report);
-//        Map<String,Boolean> response = new HashMap<>();
-//        response.put("deleted", Boolean.TRUE);
-//        return ResponseEntity.ok(response);
-//    }
+
+    //get application by id rest api
+    @GetMapping("/application/{id}{token}")
+    public ResponseEntity<Applications> getApplicationById(@PathVariable Long id,@PathVariable String token) {
+        Applications application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Application with id " +id + " does not exist."));
+        return ResponseEntity.ok(application);
+    }
+
+    // update application by id rest api
+    @PutMapping("application/{id}{token}")
+    public ResponseEntity<Applications> updateApplication(@PathVariable Long id, @RequestBody Applications applicationData,@PathVariable String token) {
+       Applications application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("application with id " +id + " does not exist."));
+        application.setName(applicationData.getName());
+        application.setUsername(applicationData.getUsername());
+        application.setStartDate(applicationData.getStartDate());
+        application.setEndDate(applicationData.getEndDate());
+        application.setReason(applicationData.getReason());
+        application.setStatus(applicationData.getStatus());
+        Applications updatedApplication = applicationRepository.save(application);
+        return ResponseEntity.ok(updatedApplication);
+    }
+
+    //delete application by id rest api
+    @DeleteMapping("/application/{id}{token}")
+    public ResponseEntity<Map<String, Boolean>> deleteApplication(@PathVariable Long id, @PathVariable String token){
+        Applications application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Application with id " +id + " does not exist."));
+        applicationRepository.delete(application);
+        Map<String,Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import ApplicationService from '../services/ApplicationService';
+import SupervisorService from '../services/SupervisorService';
 import LoginService from '../services/LoginService';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
-
-class ViewApplicationComponent extends Component {
+class ViewSupervisorComponent extends Component {
     constructor(props){
         super(props)
   
@@ -22,7 +21,7 @@ class ViewApplicationComponent extends Component {
       }
 
     componentDidMount(){
-        ApplicationService.getApplicationById(this.state.id).then( (res) =>{
+        SupervisorService.getApplicationById(this.state.id).then( (res) =>{
             let application =res.data;
             this.setState({name: application.name,
                           username: application.username,
@@ -33,7 +32,7 @@ class ViewApplicationComponent extends Component {
         });
     }
     cancel()  {
-        this.props.history.push('/application');
+        this.props.history.push('/supervisors');
     } 
     logoutButton=(event)  => {
         event.preventDefault();
@@ -44,7 +43,7 @@ class ViewApplicationComponent extends Component {
         });
       }
     render() {
-            if (user_logged === 'User') {
+            if (user_logged === 'Supervisor') {
                 return (
                     <div>
                         <div className="container">
@@ -59,6 +58,10 @@ class ViewApplicationComponent extends Component {
                                     <div className="card-body">
                                        
                                         <form>
+                                        <div className="form-group">
+                                                <label>Username</label>
+                                                <input placeholder="username" name="username" className="form-control" value={this.state.username} readOnly/>
+                                            </div>
                                             <div className="form-group">
                                                 <label>Name</label>
                                                 <input placeholder="Type " name="name" className="form-control" value={this.state.name} readOnly/>
@@ -77,7 +80,7 @@ class ViewApplicationComponent extends Component {
                                             </div>
                                             <div className="form-group">
                                                 <label>Reason</label>
-                                                <input placeholder="reason" name="reason" className="form-control" value={this.state.reason} readOnly/>
+                                                <input placeholder="" name="reason" className="form-control" value={this.state.reason} readOnly/>
                                             </div>
                                             <br>
                                             </br>
@@ -117,4 +120,4 @@ class ViewApplicationComponent extends Component {
     }
 }
 
-export default ViewApplicationComponent;
+export default ViewSupervisorComponent;

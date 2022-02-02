@@ -40,8 +40,13 @@ continueButton=(event)  => {
   if (user_logged ==="Admin") {
     this.props.history.push('/users');
   } else {
-    this.props.history.push('/application');
-  }
+    if (user_logged ==="User") {
+      this.props.history.push('/application');
+    } else {
+      this.props.history.push('/supervisors');
+    }
+    }
+   
 
 }
 loginButton  = (event) => {
@@ -60,9 +65,14 @@ loginButton  = (event) => {
       this.props.history.push('/users');
       window.location.reload();
     } else {
+      if (user_logged ==="User") {
       this.props.history.push('/application');
       window.location.reload();
+    } else{
+      this.props.history.push('/supervisors');
+      window.location.reload();
     }
+  }
     alertify.success('Login successful.');
     // localStorage.setItem('token',res.jwt);
    

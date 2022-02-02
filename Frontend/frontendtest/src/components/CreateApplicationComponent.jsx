@@ -3,6 +3,7 @@ import ApplicationService from '../services/ApplicationService';
 import LoginService from '../services/LoginService';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
+import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
 let user_name = localStorage.getItem('username');
 class CreateApplicationComponent extends Component {
@@ -32,25 +33,32 @@ class CreateApplicationComponent extends Component {
               nameValue = "Days off";
           }
           if (this.state.startDate==='') {
-              validation_message = validation_message + ' Start Date should not be empty. ';
+            this.state.startDate = new Date();
           }
           if (this.state.endDate==='') {
-            validation_message = validation_message + ' End Date should not be empty. ';
+            this.state.endDate = new Date();
         }
          
          
           if (validation_message==='') {
             let status_ob = this.state.status;
             if (status_ob === "") {
-              status_ob = "Procesuar";
+              status_ob = "Proccessed";
             }
             let application = {name: nameValue, username: user_name,status: status_ob,
                 startDate: this.state.startDate, endDate: this.state.endDate  
                      };
 
             ApplicationService.createApplication(application).then(res => {
-              this.props.history.push('/applications');
-              alertify.success('Application added successfully.');
+              let ResultString =  res.data;
+
+              if (ResultString==="Application Saved") {
+                alertify.success('Application added successfully.');
+                this.props.history.push('/application');
+              } else {
+                alertify.error(ResultString); 
+              }
+             
             }).catch ( res => {
               alertify.error('Application could not be sent.');
             }
@@ -110,11 +118,11 @@ class CreateApplicationComponent extends Component {
                                             </select>  </div>
                                             <div className="form-group">
                                             <label>Start Date</label>
-                                            <input type="date" placeholder='startDate' name="startDate" className="form-control" value={this.state.startDate} onChange={this.changeStartDateHandler}/>
+                                            <input type="date" placeholder='startDate' name="startDate" className="form-control" value={dateFormat(this.state.startDate,"yyyy-mm-dd")} onChange={this.changeStartDateHandler}/>
                                         </div>
                                         <div className="form-group">
                                             <label>End Date</label>
-                                            <input type="date" placeholder='endDate' name="endDate" className="form-control" value={this.state.endDate} onChange={this.changeEndDateHandler}/>
+                                            <input type="date" placeholder='endDate' name="endDate" className="form-control" value={dateFormat(this.state.endDate,"yyyy-mm-dd")} onChange={this.changeEndDateHandler}/>
                                         </div>
                                             <br>
                                             </br>

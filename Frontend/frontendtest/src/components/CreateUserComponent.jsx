@@ -4,6 +4,7 @@ import LoginService from '../services/LoginService';
 import 'react-notifications-component/dist/theme.css';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
+import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
 let user_name = localStorage.getItem('username');
 class CreateUserComponent extends Component {
@@ -143,7 +144,7 @@ class CreateUserComponent extends Component {
                                         </div>
                                         <div className="form-group">
                                             <label>Start Date</label>
-                                            <input type="date" placeholder='date' name="date" className="form-control" value={this.state.startDate} onChange={this.changeDateHandler}/>
+                                            <input type="date" placeholder='date' name="date" className="form-control" value={dateFormat(this.state.startDate,"yyyy-mm-dd")} onChange={this.changeDateHandler}/>
                                         </div>
                                         <br>
                                         </br>

@@ -3,6 +3,7 @@ import UserServices from '../services/UserServices';
 import LoginService from '../services/LoginService';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
+import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
 class ViewUserComponent extends Component {
     constructor(props){
@@ -70,7 +71,7 @@ class ViewUserComponent extends Component {
                                             </div>
                                             <div className="form-group">
                                                 <label>Start Date</label>
-                                                <input placeholder="Start Date" name="startDate" className="form-control" value={this.state.startDate} readOnly/>
+                                                <input placeholder="Start Date" name="startDate" className="form-control" value={dateFormat(this.state.startDate,"yyyy-mm-dd")} readOnly/>
                                             </div>
                                             <div className="form-group">
                                                 <label>Modified By</label>

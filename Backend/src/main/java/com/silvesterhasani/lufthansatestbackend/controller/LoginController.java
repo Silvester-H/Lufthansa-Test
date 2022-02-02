@@ -57,4 +57,9 @@ public class LoginController {
         return ResponseEntity.ok(new AuthenticationResponse(jwt,user_type));
 
     }
+    @CrossOrigin
+    @GetMapping ("/logout{username}{token}")
+    public void logout(@PathVariable String username,@PathVariable String token) {
+       // LOG that someone logs out
+    }
 }

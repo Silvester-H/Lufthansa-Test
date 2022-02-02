@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import ApplicationService from '../services/ApplicationService';
+import SupervisorService from '../services/SupervisorService';
 import LoginService from '../services/LoginService';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import dateFormat from 'dateformat';
 let user_logged= localStorage.getItem('user_type');
-class UpdateApplicationComponent extends Component {
+let local_vacations = 0;
+
+class UpdateSupervisorComponent extends Component {
     constructor(props){
         super(props)
   
@@ -18,16 +20,13 @@ class UpdateApplicationComponent extends Component {
             status: '',
             reason: ''
         }
-        this.changeNameHandler= this.changeNameHandler.bind(this);
-        this.changeUsernameHandler= this.changeUsernameHandler.bind(this);
-        this.changeStartDateHandler= this.changeStartDateHandler.bind(this);
-        this.changeEndDateHandler= this.changeEndDateHandler.bind(this);
+        this.changeReasonHandler= this.changeReasonHandler.bind(this);
         this.changeStatusHandler= this.changeStatusHandler.bind(this);
         this.updateApplication =this.updateApplication.bind(this);
       }
 
       componentDidMount(){
-          ApplicationService.getApplicationById(this.state.id).then( (res) =>{
+          SupervisorService.getApplicationById(this.state.id).then( (res) =>{
               let application =res.data;
               this.setState({name: application.name,
                 username: application.username,
@@ -35,35 +34,42 @@ class UpdateApplicationComponent extends Component {
                 endDate: application.endDate,
                 reason: application.reason,
                 status: application.status });
+
           });
+          SupervisorService.getVacationUser(this.state.id).then((resVacations) => {              
+            local_vacations  = resVacations.data;
+            
+        });
+    
       }
       updateApplication  = (event) => {
         event.preventDefault();
         let validation_message = '';
-        let nameValue = this.state.name;
-        if (nameValue === '') {
-            nameValue = "Days off";
-        }
-        if (this.state.startDate==='') {
-            validation_message = validation_message + ' Start Date should not be empty. ';
-        }
-        if (this.state.endDate==='') {
-          validation_message = validation_message + ' End Date should not be empty. ';
-      }
-       
-       
+        let dataNull = null;
+      
+      if (this.state.status!=='Accepted' && this.state.status!=='Denied') {
+        validation_message = validation_message + ' Please Accept or Deny the application. ';
+    }
+    if (this.state.status==='Denied') {
+        if (this.state.reason===dataNull) {
+            validation_message = validation_message + ' Please specify a reason for Denied. ';
+        } else {
+            let lengthVar = this.state.reason;
+            if (lengthVar.length<5) {
+                validation_message = validation_message + ' Please specify a longer reason ';
+            }  
+        }   
+    }
             
       if (validation_message==='') {
         let status_ob = this.state.status;
-        if (status_ob === "") {
-          status_ob = "Proccessed";
-        }
-        let application = {name: nameValue, username: this.state.username,status: status_ob,
-            startDate: this.state.startDate, endDate: this.state.endDate  
+     
+        let application = {name: this.state.name, username: this.state.username,status: status_ob,
+            startDate: this.state.startDate, endDate: this.state.endDate, reason: this.state.reason 
                  };
 
-        ApplicationService.updateApplication(application, this.state.id ).then(res => {
-          this.props.history.push('/application');
+        SupervisorService.updateApplication(application, this.state.id ).then(res => {
+          this.props.history.push('/supervisors');
           alertify.success('Application updated successfully.');
         }).catch ( res => {
           alertify.error('Application could not be updated.');
@@ -74,28 +80,15 @@ class UpdateApplicationComponent extends Component {
       }
       
       }
-    changeNameHandler=(event)  => {
-        this.setState({name: event.target.value});
-
-    }
-    changeUsernameHandler=(event)  => {
-        this.setState({username: event.target.value});
-
-    }
     changeStatusHandler=(event)  => {
         this.setState({status: event.target.value});
-
     }
-    changeStartDateHandler=(event)  => {
-        this.setState({startDate: event.target.value});
-
+    changeReasonHandler=(event)  => {
+        this.setState({reason: event.target.value});
     }
-    changeEndDateHandler=(event)  => {
-        this.setState({endDate: event.target.value});
-
-    }
+  
     cancel()  {
-        this.props.history.push('/application');
+        this.props.history.push('/supervisors');
     }
     logoutButton=(event)  => {
         event.preventDefault();
@@ -107,7 +100,7 @@ class UpdateApplicationComponent extends Component {
       }
     render() {
   
-            if (user_logged === 'User') {
+            if (user_logged === 'Supervisor') {
                 return (
                     <div>
                         <div className="container">
@@ -120,28 +113,37 @@ class UpdateApplicationComponent extends Component {
                                     <h3 className="text-center text-muted"> Update Application Details</h3>
                                     <div className="card-body">
                                         <form>
+                                        <div className="form-group">
+                                                <label>Username</label>
+                                                <input placeholder="username" name="username" className="form-control" value={this.state.username} readOnly/>
+                                            </div>
                                             <div className="form-group">
-                                            <label>Application Type</label>
-                                                <select className="form-control" name="name" value={this.state.name} onChange={this.changeNameHandler} value={this.state.name}>
-                                                <option defaultValue="Days off" >Days off</option>
-                                                <option value="Vacations">Vacations</option>
-                                                <option value="Compensation days">Compensation days</option>
-                                            </select>  </div>
+                                                <label>Number of Days remaining</label>
+                                                <input placeholder="Days remaining" name="noDays" className="form-control" value={local_vacations} readOnly/>
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Name</label>
+                                                <input placeholder="Type " name="name" className="form-control" value={this.state.name} readOnly/>
+                                            </div>
                                             <div className="form-group">
                                                 <label>Start Date</label>
-                                                <input type='date' placeholder="startDate" name="startDate" className="form-control"  onChange={this.changeStartDateHandler} value={dateFormat(this.state.startDate,"yyyy-mm-dd")} />
+                                                <input type="date" placeholder="startDate" name="startDate" className="form-control" value={dateFormat(this.state.startDate,"yyyy-mm-dd")} readOnly/>
                                             </div>
                                             <div className="form-group">
                                                 <label>End Date</label>
-                                                <input type='date' placeholder="endDate" name="endDate" className="form-control"  onChange={this.changeEndDateHandler} value={dateFormat(this.state.endDate,"yyyy-mm-dd")} />
+                                                <input type="date" placeholder="endDate" name="endDate" className="form-control" value={dateFormat(this.state.endDate,"yyyy-mm-dd")} readOnly/>
                                             </div>
                                             <div className="form-group">
                                                 <label>Status</label>
-                                                <input placeholder="status" name="status" className="form-control" value={this.state.status} readOnly/>
+                                                <select className="form-control" name="name" value={this.state.status} onChange={this.changeStatusHandler} value={this.state.status}>
+                                                <option value="Proccessed" >Proccessed</option>
+                                                <option value="Accepted">Accepted</option>
+                                                <option value="Denied">Denied</option>
+                                                </select>
                                             </div>
                                             <div className="form-group">
                                                 <label>Reason</label>
-                                                <input placeholder="reason" name="reason" className="form-control" value={this.state.reason} readOnly/>
+                                                <input placeholder="no reason" name="reason" className="form-control" onChange={this.changeReasonHandler} value={this.state.reason} />
                                             </div>
                                             <br>
                                             </br>
@@ -182,4 +184,4 @@ class UpdateApplicationComponent extends Component {
     }
 }
 
-export default UpdateApplicationComponent;
+export default UpdateSupervisorComponent;

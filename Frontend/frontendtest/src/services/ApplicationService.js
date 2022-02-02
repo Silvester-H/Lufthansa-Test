@@ -14,8 +14,11 @@ const config = {
 }
 class ApplicationService {
 
-    getApplications(username){
+    getApplications(){
         return axios.get(Application_API_BASE_URL,config);
+    }
+    getApplicationVacations(){
+        return axios.get(Application_API_BASE_URL + "Vacations",config);
     }
     createApplication(Application) {
         return axios.post(Application_API_BASE_URL,Application,config);

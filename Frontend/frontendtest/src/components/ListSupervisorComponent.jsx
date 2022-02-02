@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ApplicationService from '../services/ApplicationService';
+import SupervisorService from '../services/SupervisorService';
 import LoginService from '../services/LoginService';
 import ReactDOM from 'react-dom';
 import alertify from 'alertifyjs';
@@ -12,55 +12,40 @@ import 'datatables.net-responsive'
 
 import dateFormat from 'dateformat';
 const $ = require("jquery");
-let local_vacations = 0;
-ApplicationService.getApplicationVacations().then((resVacations) => {              
-    local_vacations  = resVacations.data;
 
-});
 $.Datatable = require("datatables.net-responsive");
 let user_logged= localStorage.getItem('user_type');
-class ListApplicationComponent extends Component {
+class ListSupervisorComponent extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
-            applications : [],
-            vacations: local_vacations
+            applications : []
             
         }
        
-        this.addApplication = this.addApplication.bind(this);
         this.editApplication = this.editApplication.bind(this);
-
         this.updateOwnPassword = this.updateOwnPassword.bind(this);
-        this.deleteApplication= this.deleteApplication.bind(this);
         this.viewApplication= this.viewApplication.bind(this);
     }
     viewApplication(id) {
-        this.props.history.push(`/view_application/${id}`);
+        this.props.history.push(`/view_supervisors/${id}`);
     }
     editApplication(id) {
-        this.props.history.push(`/update_application/${id}`);
+        this.props.history.push(`/update_supervisors/${id}`);
     }
-    deleteApplication(id){
-        ApplicationService.deleteApplication(id).then( res => {
-            this.setState({farners: this.state.applications.filter(application => application.id !== id)});
-       
-        });
-        alertify.success("Deleted successfully.",);
-        setTimeout(window.location.reload.bind(window.location), 1000);
-    }
+
     componentDidMount() {
        
-        ApplicationService.getApplications().then((res) => {
+        SupervisorService.getAllApplications().then((res) => {
             this.setState({applications: res.data});
             this.$el = $(this.el);
             this.$el.DataTable({
                 data: this.state.applications,
                 columns: [
                     { title: "Id", data: "id",  "visible": false },
-                    { title: "Username", data: "username", "visible": false },
+                    { title: "Username", data: "username", },
                     { title: "Type ", data: "name" },
                     { title: "Start Date", data: "startDate",  },
                     { title: "End Date", data: "endDate", },
@@ -83,7 +68,6 @@ class ListApplicationComponent extends Component {
                              <div className ="container-row ">
                              <button onClick={ () => this.viewApplication(rowData.id)} className="btn btn-outline-dark" style={{ width: "100px", marginLeft: "15px"}} >View</button>
                              <button onClick={ () => this.editApplication(rowData.id)} className="btn btn-outline-success" style={{ width: "100px", marginLeft: "15px"}}>Edit</button>
-                             <button onClick={ () => this.deleteApplication(rowData.id)} className="btn btn-outline-danger" style={{ width: "100px", marginLeft: "15px"}}>Delete</button>
                              </div>,td )
                            }
 
@@ -104,22 +88,17 @@ class ListApplicationComponent extends Component {
         setTimeout(window.location.reload.bind(window.location), 1000);
         });
       }
-    addApplication(){
-        this.props.history.push('/add_application');
-    }
+
     updateOwnPassword(){
-        this.props.history.push('/update_password');
+        this.props.history.push('/update_supervisor_password');
     }
     render() {
-            if (user_logged === 'User') {
+            if (user_logged === 'Supervisor') {
                 return (
                     <div>
                         <h2 className="text-center text-muted"> Applications List</h2>
-                        <div className="btn btn-outline-dark" style={{ width: "200px"}} onClick={this.addApplication}>Add new application</div>
-                        <div className="btn btn-outline-warning" style={{ width: "200px", marginLeft: "15px"}} onClick={this.updateOwnPassword}>Update Password</div>
-                        <div className='btn btn-outline-danger' style={{ width: "400px", marginLeft: "15px", disabled: true}}>
-                        Vacation Days remaining: {local_vacations}   
-                        </div>      
+                       <div className="btn btn-outline-warning" style={{ width: "200px"}} onClick={this.updateOwnPassword}>Update Password</div>
+                    
                         <br/><br></br>
                         <div className ="row">
                         <table className= "table table-light table-responsive table-hover" ref={(el) => (this.el = el)}>
@@ -190,4 +169,4 @@ class ListApplicationComponent extends Component {
 } 
 
 
-export default ListApplicationComponent;
+export default ListSupervisorComponent;
